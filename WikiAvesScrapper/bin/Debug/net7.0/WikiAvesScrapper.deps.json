@@ -8,7 +8,7 @@
     ".NETCoreApp,Version=v7.0": {
       "WikiAvesScrapper/1.0.0": {
         "dependencies": {
-          "HtmlAgilityPack": "1.11.46",
+          "AngleSharp": "1.0.1",
           "Microsoft.AspNetCore.OpenApi": "7.0.5",
           "Swashbuckle.AspNetCore": "6.4.0"
         },
@@ -16,11 +16,15 @@
           "WikiAvesScrapper.dll": {}
         }
       },
-      "HtmlAgilityPack/1.11.46": {
+      "AngleSharp/1.0.1": {
+        "dependencies": {
+          "System.Buffers": "4.5.1",
+          "System.Text.Encoding.CodePages": "7.0.0"
+        },
         "runtime": {
-          "lib/netstandard2.0/HtmlAgilityPack.dll": {
-            "assemblyVersion": "1.11.46.0",
-            "fileVersion": "1.11.46.0"
+          "lib/net7.0/AngleSharp.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "1.0.0.0"
           }
         }
       },
@@ -81,7 +85,9 @@
             "fileVersion": "6.4.0.0"
           }
         }
-      }
+      },
+      "System.Buffers/4.5.1": {},
+      "System.Text.Encoding.CodePages/7.0.0": {}
     }
   },
   "libraries": {
@@ -90,12 +96,12 @@
       "serviceable": false,
       "sha512": ""
     },
-    "HtmlAgilityPack/1.11.46": {
+    "AngleSharp/1.0.1": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-dLMn4EVfJBHWmWK4Uh0XGD76FPLHI0qr2Tm0s1m/xmgiHb1JUb9zB8AzO8HtrkBBlMN6JfCUBYddhqC0hZNR+g==",
-      "path": "htmlagilitypack/1.11.46",
-      "hashPath": "htmlagilitypack.1.11.46.nupkg.sha512"
+      "sha512": "sha512-uIezZhHZqWEb4zw/D5Xnskqb/sivIFwfWcUX2srPWTE10IYahfrdhWTIk859BpEmPmxSlMoL+S0JimFTaWGaHA==",
+      "path": "anglesharp/1.0.1",
+      "hashPath": "anglesharp.1.0.1.nupkg.sha512"
     },
     "Microsoft.AspNetCore.OpenApi/7.0.5": {
       "type": "package",
@@ -145,6 +151,20 @@
       "sha512": "sha512-1Hh3atb3pi8c+v7n4/3N80Jj8RvLOXgWxzix6w3OZhB7zBGRwsy7FWr4e3hwgPweSBpwfElqj4V4nkjYabH9nQ==",
       "path": "swashbuckle.aspnetcore.swaggerui/6.4.0",
       "hashPath": "swashbuckle.aspnetcore.swaggerui.6.4.0.nupkg.sha512"
+    },
+    "System.Buffers/4.5.1": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-Rw7ijyl1qqRS0YQD/WycNst8hUUMgrMH4FCn1nNm27M4VxchZ1js3fVjQaANHO5f3sN4isvP4a+Met9Y4YomAg==",
+      "path": "system.buffers/4.5.1",
+      "hashPath": "system.buffers.4.5.1.nupkg.sha512"
+    },
+    "System.Text.Encoding.CodePages/7.0.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-LSyCblMpvOe0N3E+8e0skHcrIhgV2huaNcjUUEa8hRtgEAm36aGkRoC8Jxlb6Ra6GSfF29ftduPNywin8XolzQ==",
+      "path": "system.text.encoding.codepages/7.0.0",
+      "hashPath": "system.text.encoding.codepages.7.0.0.nupkg.sha512"
     }
   }
 }

@@ -1,24 +1,24 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\mico_\\source\\repos\\WikiAvesScrapper\\WikiAvesScrapper\\WikiAvesScrapper.csproj": {}
+    "C:\\Fontes\\WikiAves\\WikiAvesScrapper\\WikiAvesScrapper.csproj": {}
   },
   "projects": {
-    "C:\\Users\\mico_\\source\\repos\\WikiAvesScrapper\\WikiAvesScrapper\\WikiAvesScrapper.csproj": {
+    "C:\\Fontes\\WikiAves\\WikiAvesScrapper\\WikiAvesScrapper.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\mico_\\source\\repos\\WikiAvesScrapper\\WikiAvesScrapper\\WikiAvesScrapper.csproj",
+        "projectUniqueName": "C:\\Fontes\\WikiAves\\WikiAvesScrapper\\WikiAvesScrapper.csproj",
         "projectName": "WikiAvesScrapper",
-        "projectPath": "C:\\Users\\mico_\\source\\repos\\WikiAvesScrapper\\WikiAvesScrapper\\WikiAvesScrapper.csproj",
+        "projectPath": "C:\\Fontes\\WikiAves\\WikiAvesScrapper\\WikiAvesScrapper.csproj",
         "packagesPath": "C:\\Users\\mico_\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\mico_\\source\\repos\\WikiAvesScrapper\\WikiAvesScrapper\\obj\\",
+        "outputPath": "C:\\Fontes\\WikiAves\\WikiAvesScrapper\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\mico_\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
-          "net7.0"
+          "net6.0"
         ],
         "sources": {
           "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
@@ -26,8 +26,8 @@
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
-          "net7.0": {
-            "targetAlias": "net7.0",
+          "net6.0": {
+            "targetAlias": "net6.0",
             "projectReferences": {}
           }
         },
@@ -38,12 +38,12 @@
         }
       },
       "frameworks": {
-        "net7.0": {
-          "targetAlias": "net7.0",
+        "net6.0": {
+          "targetAlias": "net6.0",
           "dependencies": {
-            "HtmlAgilityPack": {
+            "AngleSharp": {
               "target": "Package",
-              "version": "[1.11.46, )"
+              "version": "[1.0.1, )"
             },
             "Microsoft.AspNetCore.OpenApi": {
               "target": "Package",
