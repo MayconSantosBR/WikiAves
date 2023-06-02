@@ -6,11 +6,11 @@ namespace WikiAvesScrapper.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-    public class FamilyScrapperController : Controller
+    public class FamilyController : Controller
     {
-        private readonly IFamilyScrapperService familyService;
+        private readonly IFamilyService familyService;
 
-        public FamilyScrapperController(IFamilyScrapperService familyService)
+        public FamilyController(IFamilyService familyService)
         {
             this.familyService = familyService;
         }
@@ -20,11 +20,16 @@ namespace WikiAvesScrapper.Controllers
         {
             try
             {
-                return Ok(await familyService.GetFamiliesAsync());
+                var families = await familyService.GetFamiliesAsync();
+
+                if (families.IsSuccess)
+                    return Ok(families.Value);
+                else
+                    return BadRequest(families.Errors);
             }
             catch (Exception e)
             {
-                throw;
+                return BadRequest(e.Message);
             }
         }
     }

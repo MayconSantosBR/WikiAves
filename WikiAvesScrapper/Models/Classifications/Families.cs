@@ -3,7 +3,8 @@
     public class Families
     {
         public string Name { get; set; }
-        public string Resume { get; set; }
-        public List<string> Content { get; set; }
+        public string Uri { get; set; }
+        public bool IsActive { get; set; }
+        public DateTime LastCheck { get; set; }
     }
 }

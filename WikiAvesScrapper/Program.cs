@@ -1,3 +1,4 @@
+using WikiAvesScrapper.Services.Base;
 using WikiAvesScrapper.Services.Family;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -9,8 +10,10 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddScoped<IFamilyScrapperService, FamilyScrapperService>();
-builder.Services.AddHttpClient<IFamilyScrapperService, FamilyScrapperService>();
+builder.Services.AddHttpClient<ScrapperBase, ScrapperBase>();
+
+builder.Services.AddScoped<IFamilyService, FamilyService>();
+builder.Services.AddScoped<IIndexService, IndexService>();
 
 var app = builder.Build();
 

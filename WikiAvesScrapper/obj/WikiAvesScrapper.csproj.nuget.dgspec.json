@@ -45,9 +45,9 @@
               "target": "Package",
               "version": "[1.0.1, )"
             },
-            "Microsoft.AspNetCore.OpenApi": {
+            "FluentResults": {
               "target": "Package",
-              "version": "[7.0.5, )"
+              "version": "[3.15.2, )"
             },
             "Swashbuckle.AspNetCore": {
               "target": "Package",
