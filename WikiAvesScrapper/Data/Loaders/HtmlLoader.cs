@@ -1,16 +1,16 @@
 ﻿using AngleSharp;
 using AngleSharp.Dom;
 
-namespace WikiAvesScrapper.Services.Base
+namespace WikiAvesScrapper.Data.Loaders
 {
-    public class HtmlScrapperBase
+    public class HtmlLoader
     {
         public IDocument document;
-        public HtmlScrapperBase(string content)
+        public HtmlLoader(string content)
         {
             var config = Configuration.Default;
             var context = BrowsingContext.New(config);
-            this.document = context.OpenAsync(c => c.Content(content)).Result;
+            document = context.OpenAsync(c => c.Content(content)).Result;
         }
     }
 }

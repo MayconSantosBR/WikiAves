@@ -6,6 +6,7 @@ namespace WikiAvesScrapper.Services.Family
 {
     public interface IIndexService
     {
-        Task<Result<IEnumerable<IElement>>> GetIndexAsync();
+        Task<Result<List<Families>>> GetFamiliesAsync();
+        Task<Result<List<Species>>> GetSpeciesAsync();
     }
 }

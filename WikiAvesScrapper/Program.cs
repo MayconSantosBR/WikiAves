@@ -12,7 +12,6 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddHttpClient<ScrapperBase, ScrapperBase>();
 
-builder.Services.AddScoped<IFamilyService, FamilyService>();
 builder.Services.AddScoped<IIndexService, IndexService>();
 
 var app = builder.Build();
