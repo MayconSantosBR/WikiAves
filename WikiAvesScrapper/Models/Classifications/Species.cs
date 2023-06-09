@@ -8,5 +8,8 @@
         public string CommonName { get; set; }
         public long SoundQuantity { get; set; }
         public long ImageQuantity { get; set; }
+        public string Uri { get; set; }
+        public bool IsActive { get; set; }
+        public DateTime LastCheck { get; set; }
     }
 }

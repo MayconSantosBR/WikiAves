@@ -1,9 +1,9 @@
-﻿using AngleSharp;
-using AngleSharp.Dom;
+﻿using AngleSharp.Dom;
 using FluentResults;
-using WikiAvesScrapper.Data.Loaders;
+using System.Text.RegularExpressions;
 using WikiAvesScrapper.Models.Classifications;
 using WikiAvesScrapper.Services.Base;
+using WikiAvesScrapper.Util;
 
 namespace WikiAvesScrapper.Services.Family
 {
@@ -29,7 +29,9 @@ namespace WikiAvesScrapper.Services.Family
 
                 foreach (var familyElement in indexElements.Value)
                 {
-                    CleanContent(familyElement, true, specials);
+
+                    var content = familyElement.InnerHtml;
+                    content = content.UseRegex(@"\((.*?)\)").Replace("'", String.Empty);
 
                     var infoArray = familyElement.InnerHtml.Split(",");
 
@@ -46,7 +48,6 @@ namespace WikiAvesScrapper.Services.Family
                 foreach (var family in families)
                 {
                     using var response = await client.GetAsync($"/wiki/{family.Name}");
-
                     var decodedHtml = await response.Content.ReadAsStringAsync();
 
                     if (response.IsSuccessStatusCode && !decodedHtml.ToLower().Contains("esse_topico_ainda_nao_existe"))
@@ -71,14 +72,13 @@ namespace WikiAvesScrapper.Services.Family
             try
             {
                 List<Species> species = new();
-                List<string> specials = new() { " lsp" };
 
                 var indexElements = await GetIndexAsync();
 
                 string lastFamily = "";
                 foreach (var specieElement in indexElements.Value)
                 {
-                    CleanContent(specieElement, true, specials);
+                    
                     specieElement.InnerHtml = specieElement.InnerHtml.Replace(", ", ",");
 
                     var infoArray = specieElement.InnerHtml.Split(",");
@@ -100,6 +100,24 @@ namespace WikiAvesScrapper.Services.Family
                     species.Add(specie);
                 }
 
+                await Parallel.ForEachAsync(species, new ParallelOptions { MaxDegreeOfParallelism = 5 }, async (specie, token) =>
+                {
+                    {
+                        var uri = $"{EnvironmentConfig.Hosts.WikiAves}/wiki/{specie.CommonName.ToLowerInvariant().Replace("'", "_")}";
+
+                        var response = await client.GetAsync(uri);
+                        var decodedHtml = await response.Content.ReadAsStringAsync();
+
+                        if (response.IsSuccessStatusCode && !decodedHtml.ToLower().Contains("esse_topico_ainda_nao_existe"))
+                        {
+                            specie.Uri = uri;
+                            specie.IsActive = true;
+                        }
+
+                        specie.LastCheck = DateTime.UtcNow.AddHours(-3);
+                    }
+                });
+
                 return Result.Ok(species);
             }
             catch (Exception e)
@@ -115,8 +133,8 @@ namespace WikiAvesScrapper.Services.Family
                 using var response = await client.GetAsync("/especies.php?t=t");
                 var content = await response.Content.ReadAsStringAsync();
 
-                var loader = new HtmlLoader(content);
-                var indexElements = loader.document.GetElementsByTagName("script").Where(c => c.InnerHtml.Contains("lsp('"));
+                var html = await content.LoadHtmlAsync();
+                var indexElements = html.GetElementsByTagName("script").Where(c => c.InnerHtml.Contains("lsp('"));
 
                 if (indexElements == null)
                     return Result.Fail("Not found any elements at this page.");
