@@ -18,5 +18,10 @@ namespace WikiAvesScrapper.Util
             Regex regex = new Regex(expression, RegexOptions.None);
             return regex.Match(text).Groups[position].Value.ToString();
         }
+
+        public static string OnlyNumbers(this string text)
+        {
+            return new String(text.Where(Char.IsDigit).ToArray());
+        }
     }
 }

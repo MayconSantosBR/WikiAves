@@ -29,7 +29,6 @@ namespace WikiAvesScrapper.Services.Family
 
                 foreach (var familyElement in indexElements.Value)
                 {
-
                     var content = familyElement.InnerHtml;
                     content = content.UseRegex(@"\((.*?)\)").Replace("'", String.Empty);
 
@@ -78,10 +77,13 @@ namespace WikiAvesScrapper.Services.Family
                 string lastFamily = "";
                 foreach (var specieElement in indexElements.Value)
                 {
-                    
-                    specieElement.InnerHtml = specieElement.InnerHtml.Replace(", ", ",");
+                    var content = specieElement.InnerHtml;
+                    content = content.UseRegex(@"\((.*)\)")
+                        .Replace(", ", ",")
+                        .Replace(",'", ",")
+                        .Replace("',", ",");
 
-                    var infoArray = specieElement.InnerHtml.Split(",");
+                    var infoArray = content.Split(",");
 
                     if (infoArray == null)
                         continue;
@@ -90,12 +92,12 @@ namespace WikiAvesScrapper.Services.Family
                         lastFamily = infoArray[1];
 
                     Species specie = new();
-                    specie.SpecieId = Convert.ToInt64(infoArray[0]);
+                    specie.SpecieId = Convert.ToInt64(infoArray[0].OnlyNumbers());
                     specie.Family = lastFamily;
                     specie.SpecieName = infoArray[2];
-                    specie.CommonName = infoArray[3];
-                    specie.ImageQuantity = Convert.ToInt64(infoArray[5]);
-                    specie.SoundQuantity = Convert.ToInt64(infoArray[6]);
+                    specie.CommonName = infoArray[3].Replace("\\", String.Empty);
+                    specie.ImageQuantity = Convert.ToInt64(infoArray[5].OnlyNumbers());
+                    specie.SoundQuantity = Convert.ToInt64(infoArray[6].OnlyNumbers());
 
                     species.Add(specie);
                 }
@@ -103,18 +105,25 @@ namespace WikiAvesScrapper.Services.Family
                 await Parallel.ForEachAsync(species, new ParallelOptions { MaxDegreeOfParallelism = 5 }, async (specie, token) =>
                 {
                     {
-                        var uri = $"{EnvironmentConfig.Hosts.WikiAves}/wiki/{specie.CommonName.ToLowerInvariant().Replace("'", "_")}";
-
-                        var response = await client.GetAsync(uri);
-                        var decodedHtml = await response.Content.ReadAsStringAsync();
-
-                        if (response.IsSuccessStatusCode && !decodedHtml.ToLower().Contains("esse_topico_ainda_nao_existe"))
+                        try
                         {
-                            specie.Uri = uri;
-                            specie.IsActive = true;
-                        }
+                            var uri = $"{EnvironmentConfig.Hosts.WikiAves}/wiki/{specie.CommonName.ToLower().Replace("'", "_")}";
 
-                        specie.LastCheck = DateTime.UtcNow.AddHours(-3);
+                            var response = await client.GetAsync(uri);
+                            var decodedHtml = await response.Content.ReadAsStringAsync();
+
+                            if (response.IsSuccessStatusCode && !decodedHtml.ToLower().Contains("esse_topico_ainda_nao_existe"))
+                            {
+                                specie.Uri = uri;
+                                specie.IsActive = true;
+                            }
+
+                            specie.LastCheck = DateTime.UtcNow.AddHours(-3);
+                        }
+                        catch (Exception e)
+                        {
+                            throw;
+                        }
                     }
                 });
 
