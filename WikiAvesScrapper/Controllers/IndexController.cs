@@ -16,7 +16,10 @@ namespace WikiAvesScrapper.Controllers
         }
 
         [HttpGet("GetFamilies")]
-        public async Task<ActionResult<List<Families>>> GetFamilies()
+        public async Task<ActionResult<List<Families>>> GetFamilies
+            (
+                [FromQuery] bool checkIntegrity = false
+            )
         {
             try
             {
@@ -34,11 +37,14 @@ namespace WikiAvesScrapper.Controllers
         }
 
         [HttpGet("GetSpecies")]
-        public async Task<ActionResult<List<Species>>> GetSpecies()
+        public async Task<ActionResult<List<Species>>> GetSpecies
+            (
+                [FromQuery] bool checkIntegrity = false
+            )
         {
             try
             {
-                var species = await indexService.GetSpeciesAsync();
+                var species = await indexService.GetSpeciesAsync(checkIntegrity);
 
                 if (species.IsSuccess)
                     return Ok(species.Value);

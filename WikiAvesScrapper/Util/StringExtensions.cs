@@ -1,6 +1,7 @@
 ﻿using AngleSharp;
 using AngleSharp.Dom;
 using System.Text.RegularExpressions;
+using IConfiguration = AngleSharp.IConfiguration;
 
 namespace WikiAvesScrapper.Util
 {
@@ -13,6 +14,12 @@ namespace WikiAvesScrapper.Util
             return await context.OpenAsync(c => c.Content(content));
         }
 
+        public async static Task<IDocument> LoadHtmlAsync(this string content, IConfiguration config)
+        {
+            var context = BrowsingContext.New(config);
+            return await context.OpenAsync(c => c.Content(content));
+        }
+
         public static string UseRegex(this string text, string expression, int position = 1)
         {
             Regex regex = new Regex(expression, RegexOptions.None);
@@ -21,7 +28,7 @@ namespace WikiAvesScrapper.Util
 
         public static string OnlyNumbers(this string text)
         {
-            return new String(text.Where(Char.IsDigit).ToArray());
+            return new String(text.Where(char.IsDigit).ToArray());
         }
     }
 }

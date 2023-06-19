@@ -15,12 +15,11 @@ namespace WikiAvesScrapper.Services.Family
             this.logger = logger;
         }
 
-        public async Task<Result<List<Families>>> GetFamiliesAsync()
+        public async Task<Result<List<Families>>> GetFamiliesAsync(bool checkIntegrity = false)
         {
             try
             {
                 List<Families> families = new();
-                List<string> specials = new() { "lsp", " " };
 
                 var indexElements = await GetIndexAsync();
 
@@ -39,23 +38,34 @@ namespace WikiAvesScrapper.Services.Family
 
                     if (infoArray[1].Split(" ").Count() == 1)
                     {
-                        Families family = new() { Name = infoArray[1] };
+                        Families family = new();
+                        family.Name = infoArray[1];
+                        family.Uri = $"{EnvironmentConfig.Hosts.WikiAves}/wiki/{family.Name.ToLower()}";
                         families.Add(family);
                     }
                 }
 
-                foreach (var family in families)
+                if (checkIntegrity)
                 {
-                    using var response = await client.GetAsync($"/wiki/{family.Name}");
-                    var decodedHtml = await response.Content.ReadAsStringAsync();
-
-                    if (response.IsSuccessStatusCode && !decodedHtml.ToLower().Contains("esse_topico_ainda_nao_existe"))
+                    await Parallel.ForEachAsync(families, new ParallelOptions() { MaxDegreeOfParallelism = 5 }, async (family, token) =>
                     {
-                        family.Uri = $"{EnvironmentConfig.Hosts.WikiAves}/wiki/{family.Name.ToLower()}";
-                        family.IsActive = true;
-                    }
+                        {
+                            try
+                            {
+                                using var response = await client.GetAsync($"/wiki/{family.Name}");
+                                var decodedHtml = await response.Content.ReadAsStringAsync();
 
-                    family.LastCheck = DateTime.UtcNow.AddHours(-3);
+                                if (response.IsSuccessStatusCode && !decodedHtml.ToLower().Contains("esse_topico_ainda_nao_existe"))
+                                    family.IsActive = true;
+
+                                family.LastCheck = DateTime.UtcNow.AddHours(-3);
+                            }
+                            catch (Exception)
+                            {
+                                throw;
+                            }
+                        }
+                    });
                 }
 
                 return Result.Ok(families);
@@ -66,7 +76,7 @@ namespace WikiAvesScrapper.Services.Family
             }
         }
 
-        public async Task<Result<List<Species>>> GetSpeciesAsync()
+        public async Task<Result<List<Species>>> GetSpeciesAsync(bool checkIntegrity = false)
         {
             try
             {
@@ -98,35 +108,34 @@ namespace WikiAvesScrapper.Services.Family
                     specie.CommonName = infoArray[3].Replace("\\", String.Empty);
                     specie.ImageQuantity = Convert.ToInt64(infoArray[5].OnlyNumbers());
                     specie.SoundQuantity = Convert.ToInt64(infoArray[6].OnlyNumbers());
+                    specie.Uri = $"{EnvironmentConfig.Hosts.WikiAves}/wiki/{specie.CommonName.ToLower().Replace("'", "_")}";
 
                     species.Add(specie);
                 }
 
-                await Parallel.ForEachAsync(species, new ParallelOptions { MaxDegreeOfParallelism = 5 }, async (specie, token) =>
+                if (checkIntegrity)
                 {
+                    await Parallel.ForEachAsync(species, new ParallelOptions { MaxDegreeOfParallelism = 5 }, async (specie, token) =>
                     {
-                        try
                         {
-                            var uri = $"{EnvironmentConfig.Hosts.WikiAves}/wiki/{specie.CommonName.ToLower().Replace("'", "_")}";
-
-                            var response = await client.GetAsync(uri);
-                            var decodedHtml = await response.Content.ReadAsStringAsync();
-
-                            if (response.IsSuccessStatusCode && !decodedHtml.ToLower().Contains("esse_topico_ainda_nao_existe"))
+                            try
                             {
-                                specie.Uri = uri;
-                                specie.IsActive = true;
+                                var response = await client.GetAsync(specie.Uri);
+                                var decodedHtml = await response.Content.ReadAsStringAsync();
+
+                                if (response.IsSuccessStatusCode && !decodedHtml.ToLower().Contains("esse_topico_ainda_nao_existe"))
+                                    specie.IsActive = true;
+
+                                specie.LastCheck = DateTime.UtcNow.AddHours(-3);
                             }
-
-                            specie.LastCheck = DateTime.UtcNow.AddHours(-3);
+                            catch (Exception e)
+                            {
+                                throw;
+                            }
                         }
-                        catch (Exception e)
-                        {
-                            throw;
-                        }
-                    }
-                });
-
+                    });
+                }
+                
                 return Result.Ok(species);
             }
             catch (Exception e)

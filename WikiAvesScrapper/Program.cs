@@ -1,5 +1,6 @@
 using WikiAvesScrapper.Services.Base;
 using WikiAvesScrapper.Services.Family;
+using WikiAvesScrapper.Services.Sound;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,6 +14,7 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddHttpClient<ScrapperBase, ScrapperBase>();
 
 builder.Services.AddScoped<IIndexService, IndexService>();
+builder.Services.AddScoped<ISoundService, SoundService>();
 
 var app = builder.Build();
 

@@ -6,7 +6,7 @@ namespace WikiAvesScrapper.Services.Family
 {
     public interface IIndexService
     {
-        Task<Result<List<Families>>> GetFamiliesAsync();
-        Task<Result<List<Species>>> GetSpeciesAsync();
+        Task<Result<List<Families>>> GetFamiliesAsync(bool checkIntegrity = false);
+        Task<Result<List<Species>>> GetSpeciesAsync(bool checkIntegrity = false);
     }
 }
