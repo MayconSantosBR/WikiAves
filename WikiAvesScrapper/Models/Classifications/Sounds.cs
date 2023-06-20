@@ -9,6 +9,6 @@ namespace WikiAvesScrapper.Models.Classifications
         public string SoundEmitter { get; set; }
         public Animals AnimalSpecifications { get; set; }
         public Files FileSpecifications { get; set; }
-        public OtherSpecifications Others { get; set; }
+        public Locations Locations { get; set; }
     }
 }

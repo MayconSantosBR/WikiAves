@@ -37,11 +37,7 @@ namespace WikiAvesScrapper.Services.Sound
                     Sounds sound = new()
                     {
                         FileSpecifications = new(),
-                        Others = new()
-                        {
-                            Locations = new(),
-                            Author = new()
-                        },
+                        Locations = new()
                     };
 
                     var desserializedSound = JsonConvert.DeserializeObject<GetRegistrosResponse>(stdJsonContent["registros"]["itens"][Convert.ToString(i)].ToString());
@@ -52,10 +48,8 @@ namespace WikiAvesScrapper.Services.Sound
                     sound.FileSpecifications.LinkForSound = desserializedSound.S3BrowserLink.Replace("#", string.Empty).Replace(".jpg", ".mp3");
 
                     var location = desserializedSound.Location.Split('/');
-                    sound.Others.Locations.City = location[0];
-                    sound.Others.Locations.State = location[1];
-                    sound.Others.Author.Name = desserializedSound.Author;
-                    sound.Others.Author.Username = desserializedSound.Account;
+                    sound.Locations.City = location[0];
+                    sound.Locations.State = location[1];
 
                     sounds.Add(sound);
                 }
