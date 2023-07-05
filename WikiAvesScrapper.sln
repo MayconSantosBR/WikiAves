@@ -3,11 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.6.33712.159
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WikiAvesScrapper", "WikiAvesScrapper\WikiAvesScrapper.csproj", "{7FF858AC-6727-43B4-9F4B-C039FE79FB90}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WikiAves.Scrapper", "WikiAvesScrapper\WikiAves.Scrapper.csproj", "{7FF858AC-6727-43B4-9F4B-C039FE79FB90}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WikiAvesDownloader", "WikiAvesDownloader\WikiAvesDownloader.csproj", "{4B6F2732-23A7-4865-9C3F-FD341460D024}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WikiAves.Downloader", "WikiAvesDownloader\WikiAves.Downloader.csproj", "{4B6F2732-23A7-4865-9C3F-FD341460D024}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WikiAvesCore", "WikiAvesCore\WikiAvesCore.csproj", "{BE3EA98C-922D-47CF-83E7-BBE2FA8DBCDE}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WikiAves.Core", "WikiAvesCore\WikiAves.Core.csproj", "{BE3EA98C-922D-47CF-83E7-BBE2FA8DBCDE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

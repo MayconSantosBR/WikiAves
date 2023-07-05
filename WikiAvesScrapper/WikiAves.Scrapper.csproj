@@ -16,7 +16,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\WikiAvesCore\WikiAvesCore.csproj" />
+    <ProjectReference Include="..\WikiAvesCore\WikiAves.Core.csproj" />
   </ItemGroup>
 
 </Project>
