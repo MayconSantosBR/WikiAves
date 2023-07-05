@@ -1,5 +1,5 @@
 ﻿using FluentResults;
-using WikiAvesScrapper.Models.Classifications;
+using WikiAvesCore.Models.Classifications;
 
 namespace WikiAvesScrapper.Services.Sound
 {

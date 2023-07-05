@@ -1,9 +1,10 @@
 ﻿using AngleSharp.Dom;
 using FluentResults;
 using System.Text.RegularExpressions;
-using WikiAvesScrapper.Models.Classifications;
+using WikiAvesCore.Models.Classifications;
 using WikiAvesScrapper.Services.Base;
 using WikiAvesScrapper.Util;
+using WikiAvesCore.Util;
 
 namespace WikiAvesScrapper.Services.Family
 {

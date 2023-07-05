@@ -16,7 +16,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Data\" />
+    <ProjectReference Include="..\WikiAvesCore\WikiAvesCore.csproj" />
   </ItemGroup>
 
 </Project>

@@ -1,4 +1,4 @@
-﻿namespace WikiAvesScrapper.Models.Archives
+﻿namespace WikiAvesCore.Models.Archives
 {
     public class Files
     {

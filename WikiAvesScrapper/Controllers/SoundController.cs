@@ -1,6 +1,5 @@
 ﻿using FluentResults;
 using Microsoft.AspNetCore.Mvc;
-using WikiAvesScrapper.Models.Classifications;
 using WikiAvesScrapper.Services.Sound;
 
 namespace WikiAvesScrapper.Controllers
@@ -16,8 +15,8 @@ namespace WikiAvesScrapper.Controllers
             this.soundService = soundService;
         }
 
-        [HttpGet("GetSoundsBySpecieId")]
-        public async Task<ActionResult<List<string>>> GetSoundsBySpecieId(long specieId)
+        [HttpGet("scrapper/specie/{specieId}")]
+        public async Task<ActionResult<List<string>>> GetSoundsBySpecieId([FromRoute] long specieId)
         {
             try
             {

@@ -1,4 +1,4 @@
-﻿namespace WikiAvesScrapper.Models.Classifications
+﻿namespace WikiAvesCore.Models.Classifications
 {
     public class Species
     {

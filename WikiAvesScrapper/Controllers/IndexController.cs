@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using WikiAvesScrapper.Models.Classifications;
+using WikiAvesCore.Models.Classifications;
 using WikiAvesScrapper.Services.Family;
 
 namespace WikiAvesScrapper.Controllers
@@ -15,7 +15,7 @@ namespace WikiAvesScrapper.Controllers
             this.indexService = familyService;
         }
 
-        [HttpGet("GetFamilies")]
+        [HttpGet("scrapper/families")]
         public async Task<ActionResult<List<Families>>> GetFamilies
             (
                 [FromQuery] bool checkIntegrity = false
@@ -36,7 +36,7 @@ namespace WikiAvesScrapper.Controllers
             }
         }
 
-        [HttpGet("GetSpecies")]
+        [HttpGet("scrapper/species")]
         public async Task<ActionResult<List<Species>>> GetSpecies
             (
                 [FromQuery] bool checkIntegrity = false

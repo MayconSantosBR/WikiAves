@@ -3,10 +3,11 @@ using FluentResults;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System.Text.Json.Nodes;
-using WikiAvesScrapper.Models.Classifications;
+using WikiAvesCore.Models.Classifications;
 using WikiAvesScrapper.Models.Responses;
 using WikiAvesScrapper.Services.Base;
 using WikiAvesScrapper.Util;
+using WikiAvesCore.Util;
 
 namespace WikiAvesScrapper.Services.Sound
 {

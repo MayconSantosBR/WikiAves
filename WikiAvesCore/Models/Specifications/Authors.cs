@@ -1,4 +1,4 @@
-﻿namespace WikiAvesScrapper.Models.Specifications
+﻿namespace WikiAvesCore.Models.Specifications
 {
     public class Authors
     {

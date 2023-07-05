@@ -1,7 +1,7 @@
-﻿using WikiAvesScrapper.Models.Archives;
-using WikiAvesScrapper.Models.Specifications;
+﻿using WikiAvesCore.Models.Archives;
+using WikiAvesCore.Models.Specifications;
 
-namespace WikiAvesScrapper.Models.Classifications
+namespace WikiAvesCore.Models.Classifications
 {
     public class Sounds
     {
