@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using WikiAves.Core.Models.Classifications.Interfaces;
 using WikiAvesCore.Models.Classifications;
 using WikiAvesDownloader.Requesters.Interfaces;
 
@@ -20,15 +21,17 @@ namespace WikiAvesDownloader.Requesters
             this.client.BaseAddress = new Uri("https://localhost:7173");
         }
 
-        public async Task<List<Families>?> GetFamiliesAsync()
+        public async Task<List<T>?> GetIndexesAsync<T>()
         {
             try
             {
-                using var response = await client.GetAsync($"/index/scrapper/families");
+                var obj = typeof(T);
 
-                var families = JsonConvert.DeserializeObject<List<Families>?>(await response.Content.ReadAsStringAsync());
+                using var response = await client.GetAsync($"/index/scrapper/{obj.Name.ToLower()}");
 
-                return families;
+                var indexes = JsonConvert.DeserializeObject<List<T>?>(await response.Content.ReadAsStringAsync());
+
+                return indexes;
             }
             catch (Exception e)
             {

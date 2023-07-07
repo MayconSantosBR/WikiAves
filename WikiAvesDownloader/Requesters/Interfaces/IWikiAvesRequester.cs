@@ -4,7 +4,7 @@ namespace WikiAvesDownloader.Requesters.Interfaces
 {
     public interface IWikiAvesRequester
     {
-        Task<List<Families>?> GetFamiliesAsync();
+        Task<List<T>?> GetIndexesAsync<T>();
         Task<List<Sounds>?> GetSpecieSoundsAsync(long specieId);
     }
 }

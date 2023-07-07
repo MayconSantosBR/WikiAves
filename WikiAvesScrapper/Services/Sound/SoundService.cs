@@ -31,9 +31,9 @@ namespace WikiAvesScrapper.Services.Sound
                 var registersObject = await response.Content.ReadAsStringAsync();
                 var stdJsonContent = JToken.Parse(registersObject); //text["registros"]["itens"][0]["1"]
 
-                var itens = stdJsonContent["registros"]["total"];
+                var itens = stdJsonContent["registros"]["itens"].Count();
 
-                for (int i = 1; i < Convert.ToInt16(itens); i++)
+                for (int i = 1; i <= Convert.ToInt16(itens); i++)
                 {
                     Sounds sound = new()
                     {
