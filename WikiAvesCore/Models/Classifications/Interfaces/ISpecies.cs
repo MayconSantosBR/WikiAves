@@ -7,7 +7,6 @@
         public string SpecieName { get; set; }
         public string CommonName { get; set; }
         public string Uri { get; set; }
-        public bool? IsActive { get; set; }
         public DateTime? LastCheck { get; set; }
     }
 }

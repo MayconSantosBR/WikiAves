@@ -29,7 +29,7 @@ namespace WikiAvesScrapper.Services.Sound
                 using var response = await client.GetAsync($"{EnvironmentConfig.Hosts.WikiAves}/getRegistrosJSON.php?tm=s&t=s&s={specieId}&o=mp&o=mp&p=1");
 
                 var registersObject = await response.Content.ReadAsStringAsync();
-                var stdJsonContent = JToken.Parse(registersObject); //text["registros"]["itens"][0]["1"]
+                var stdJsonContent = JToken.Parse(registersObject);
 
                 var itens = stdJsonContent["registros"]["itens"].Count();
 

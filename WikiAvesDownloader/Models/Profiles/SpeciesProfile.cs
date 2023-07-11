@@ -13,7 +13,9 @@ namespace WikiAves.Downloader.Models.Profiles
         public SpeciesProfile()
         {
             CreateMap<Species, SpeciesDocument>();
-            CreateMap<SpeciesDocument, Species>().ForSourceMember(src => src.Sounds, c => c.DoNotValidate());
+            CreateMap<SpeciesDocument, Species>()
+                .ForSourceMember(src => src.Sounds, c => c.DoNotValidate())
+                .ForSourceMember(src => src.Id, c => c.DoNotValidate());
         }
     }
 }

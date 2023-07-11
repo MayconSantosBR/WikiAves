@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.Extensions.DependencyInjection;
+using MongoDB.Bson;
 using MongoDB.Driver;
 using Newtonsoft.Json.Linq;
 using System;
@@ -38,18 +39,43 @@ namespace WikiAves.Downloader
                 if (species == null)
                     throw new Exception("Nothing was found for species!");
 
-                List<WriteModel<SpeciesDocument>> speciesDocument = new();
+                var database = mongoClient.GetDatabase("wikiaves");
+                var collection = database.GetCollection<SpeciesDocument>("species", new MongoCollectionSettings() { AssignIdOnInsert = false });
+
+                List<WriteModel<SpeciesDocument>> createSpecies = new();
 
                 await Parallel.ForEachAsync(species, new ParallelOptions() { MaxDegreeOfParallelism = 1 }, async (specie, token) =>
                 {
-                    var document = mapper.Map<SpeciesDocument>(specie);
-                    document.Sounds = await wikiAvesRequester.GetSpecieSoundsAsync(specie.SpecieId);
-                    speciesDocument.Add(new InsertOneModel<SpeciesDocument>(document));
+                    try
+                    {
+                        var document = mapper.Map<SpeciesDocument>(specie);
+                        document.Sounds = await wikiAvesRequester.GetSpecieSoundsAsync(specie.SpecieId);
+
+                        var mongoDocument = await collection.FindAsync(c => c.SpecieId == document.SpecieId);
+                        var copy = await mongoDocument.FirstOrDefaultAsync();
+
+                        if (copy == null)
+                        {
+                            document.Id = ObjectId.GenerateNewId();
+                            createSpecies.Add(new InsertOneModel<SpeciesDocument>(document));
+                            return;
+                        }
+
+                        (document.Id, document.LastCheck) = (copy.Id, copy.LastCheck);
+
+                        if (!document.Equals(copy) || !copy.LastCheck.HasValue || copy.LastCheck.Value.Date < DateTime.UtcNow.Date)
+                        {
+                            document.LastCheck = DateTime.UtcNow.AddHours(-3);
+                            await collection.ReplaceOneAsync(c => c.SpecieId == document.SpecieId, document);
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        return;
+                    }
                 });
 
-                var database = mongoClient.GetDatabase("wikiaves");
-                var collection = database.GetCollection<SpeciesDocument>("species", new MongoCollectionSettings() { AssignIdOnInsert = false });
-                await collection.BulkWriteAsync(speciesDocument);
+                await collection.BulkWriteAsync(createSpecies);
             }
             catch (Exception e)
             {
