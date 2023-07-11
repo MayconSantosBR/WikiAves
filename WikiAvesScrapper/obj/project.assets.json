@@ -5254,19 +5254,19 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\mico_\\.nuget\\packages\\": {}
+    "C:\\Users\\maycon.santos\\.nuget\\packages\\": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Fontes\\WikiAves\\WikiAvesScrapper\\WikiAves.Scrapper.csproj",
+      "projectUniqueName": "C:\\Estudo\\WikiAves\\WikiAvesScrapper\\WikiAves.Scrapper.csproj",
       "projectName": "WikiAves.Scrapper",
-      "projectPath": "C:\\Fontes\\WikiAves\\WikiAvesScrapper\\WikiAves.Scrapper.csproj",
-      "packagesPath": "C:\\Users\\mico_\\.nuget\\packages\\",
-      "outputPath": "C:\\Fontes\\WikiAves\\WikiAvesScrapper\\obj\\",
+      "projectPath": "C:\\Estudo\\WikiAves\\WikiAvesScrapper\\WikiAves.Scrapper.csproj",
+      "packagesPath": "C:\\Users\\maycon.santos\\.nuget\\packages\\",
+      "outputPath": "C:\\Estudo\\WikiAves\\WikiAvesScrapper\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
-        "C:\\Users\\mico_\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Users\\maycon.santos\\AppData\\Roaming\\NuGet\\NuGet.Config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
       "originalTargetFrameworks": [
@@ -5281,8 +5281,8 @@
         "net6.0": {
           "targetAlias": "net6.0",
           "projectReferences": {
-            "C:\\Fontes\\WikiAves\\WikiAvesCore\\WikiAves.Core.csproj": {
-              "projectPath": "C:\\Fontes\\WikiAves\\WikiAvesCore\\WikiAves.Core.csproj"
+            "C:\\Estudo\\WikiAves\\WikiAvesCore\\WikiAves.Core.csproj": {
+              "projectPath": "C:\\Estudo\\WikiAves\\WikiAvesCore\\WikiAves.Core.csproj"
             }
           }
         }

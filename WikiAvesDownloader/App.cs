@@ -44,7 +44,7 @@ namespace WikiAves.Downloader
 
                 List<WriteModel<SpeciesDocument>> createSpecies = new();
 
-                await Parallel.ForEachAsync(species, new ParallelOptions() { MaxDegreeOfParallelism = 1 }, async (specie, token) =>
+                await Parallel.ForEachAsync(species, new ParallelOptions() { MaxDegreeOfParallelism = 5 }, async (specie, token) =>
                 {
                     try
                     {
@@ -56,7 +56,7 @@ namespace WikiAves.Downloader
 
                         if (copy == null)
                         {
-                            document.Id = ObjectId.GenerateNewId();
+                            (document.Id, document.LastCheck) = (ObjectId.GenerateNewId(), DateTime.UtcNow.AddHours(-3));
                             createSpecies.Add(new InsertOneModel<SpeciesDocument>(document));
                             return;
                         }
