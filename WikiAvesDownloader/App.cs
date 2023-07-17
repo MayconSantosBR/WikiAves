@@ -32,6 +32,7 @@ namespace WikiAves.Downloader
             try
             {
                 await mongoService.SaveSpeciesAsync();
+                await mongoService.DownloadSpeciesAsync();
             }
             catch (Exception e)
             {

@@ -12,6 +12,7 @@ services.AddSingleton<IMongoClient>(c => { return new MongoClient("mongodb://loc
 services.AddSingleton<IMongoService, MongoService>();
 services.AddSingleton<IWikiAvesRequester, WikiAvesRequester>();
 services.AddHttpClient<IWikiAvesRequester, WikiAvesRequester>();
+services.AddHttpClient<IMongoClient, MongoClient>();
 services.AddAutoMapper(typeof(Mapper));
 
 Console.WriteLine("App initialized!");

@@ -4,8 +4,10 @@ using MongoDB.Driver;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
+using WikiAves.Core.Util;
 using WikiAves.Downloader.Models;
 using WikiAves.Downloader.Services.Interfaces;
 using WikiAvesCore.Models.Classifications;
@@ -19,12 +21,15 @@ namespace WikiAves.Downloader.Services
         private readonly IMongoClient client;
         private readonly IWikiAvesRequester wikiAvesRequester;
         private readonly IMapper mapper;
+        private HttpClient httpClient;
 
-        public MongoService(IMongoClient client, IWikiAvesRequester wikiAvesRequester, IMapper mapper)
+
+        public MongoService(IMongoClient client, IWikiAvesRequester wikiAvesRequester, IMapper mapper, HttpClient httpClient)
         {
             this.client = client;
             this.wikiAvesRequester = wikiAvesRequester;
             this.mapper = mapper;
+            this.httpClient = httpClient;
         }
 
         public async Task SaveSpeciesAsync()
@@ -41,7 +46,7 @@ namespace WikiAves.Downloader.Services
 
                 List<WriteModel<SpeciesDocument>> createSpecies = new();
 
-                await Parallel.ForEachAsync(species, new ParallelOptions() { MaxDegreeOfParallelism = 10 }, async (specie, token) =>
+                await Parallel.ForEachAsync(species, new ParallelOptions() { MaxDegreeOfParallelism = 15 }, async (specie, token) =>
                 {
                     try
                     {
@@ -77,6 +82,38 @@ namespace WikiAves.Downloader.Services
 
                 if (createSpecies.Count > 0)
                     await collection.BulkWriteAsync(createSpecies);
+            }
+            catch (Exception e)
+            {
+                await Console.Out.WriteLineAsync(e.Message);
+            }
+        }
+
+        public async Task DownloadSpeciesAsync()
+        {
+            try
+            {
+                var database = client.GetDatabase("wikiaves");
+                var collection = database.GetCollection<SpeciesDocument>("species", new MongoCollectionSettings() { AssignIdOnInsert = false });
+
+                var speciesWithSound = await collection.FindAsync(c => c.Sounds.Count() != 0);
+
+                do
+                {
+                    if (await speciesWithSound.MoveNextAsync())
+                    {
+                        var documents = speciesWithSound.Current;
+
+                        await Parallel.ForEachAsync(documents, new ParallelOptions() { MaxDegreeOfParallelism = 1 }, async (document, token) =>
+                        {
+                            
+                        });
+                    }
+                    else
+                    {
+                        break;
+                    }
+                } while (true);
             }
             catch (Exception e)
             {

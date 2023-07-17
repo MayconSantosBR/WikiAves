@@ -3,5 +3,6 @@
     public interface IMongoService
     {
         Task SaveSpeciesAsync();
+        Task DownloadSpeciesAsync();
     }
 }
