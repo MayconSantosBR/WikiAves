@@ -116,13 +116,11 @@ namespace WikiAves.Downloader.Services
                                                             .ElementAt(1)
                                                             .Replace(".mp3", string.Empty);
 
-                                    var pathForImage = @$"C:\Estudo\WikiAvesSounds\Images\{document.CommonName}-{identifier}.jpg";
                                     var pathForSound = @$"C:\Estudo\WikiAvesSounds\Sounds\{document.CommonName}-{identifier}.mp3";
 
-                                    if (File.Exists(pathForImage) || File.Exists(pathForSound))
+                                    if (File.Exists(pathForSound))
                                         continue;
 
-                                    await httpClient.DownloadFileTaskAsync(sound.FileSpecifications.LinkForImage, pathForImage);
                                     await httpClient.DownloadFileTaskAsync(sound.FileSpecifications.LinkForSound, pathForSound);
 
                                     await Console.Out.WriteLineAsync($"[{document.SpecieId}][{document.CommonName}] Sound {document.Sounds.IndexOf(sound) + 1} downloaded!");
