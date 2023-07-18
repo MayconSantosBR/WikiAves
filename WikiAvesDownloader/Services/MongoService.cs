@@ -104,21 +104,28 @@ namespace WikiAves.Downloader.Services
                     {
                         var documents = speciesWithSound.Current;
 
-                        await Parallel.ForEachAsync(documents, new ParallelOptions() { MaxDegreeOfParallelism = 1 }, async (document, token) =>
+                        await Parallel.ForEachAsync(documents, new ParallelOptions() { MaxDegreeOfParallelism = 10 }, async (document, token) =>
                         {
                             foreach (var sound in document.Sounds)
                             {
                                 try
                                 {
-                                    var pathForImage = @$"C:\Estudo\WikiAvesSounds\Images\{document.CommonName}-{sound.GetHashCode()}.jpg";
-                                    var pathForSound = @$"C:\Estudo\WikiAvesSounds\Sounds\{document.CommonName}-{sound.GetHashCode()}.mp3";
+                                    var identifier = sound.FileSpecifications.LinkForSound
+                                                            .Split("_")
+                                                            .ToList()
+                                                            .ElementAt(1)
+                                                            .Replace(".mp3", string.Empty);
 
-                                    //Dont work, need to be rewied
+                                    var pathForImage = @$"C:\Estudo\WikiAvesSounds\Images\{document.CommonName}-{identifier}.jpg";
+                                    var pathForSound = @$"C:\Estudo\WikiAvesSounds\Sounds\{document.CommonName}-{identifier}.mp3";
+
                                     if (File.Exists(pathForImage) || File.Exists(pathForSound))
                                         continue;
 
                                     await httpClient.DownloadFileTaskAsync(sound.FileSpecifications.LinkForImage, pathForImage);
                                     await httpClient.DownloadFileTaskAsync(sound.FileSpecifications.LinkForSound, pathForSound);
+
+                                    await Console.Out.WriteLineAsync($"[{document.SpecieId}][{document.CommonName}] Sound {document.Sounds.IndexOf(sound) + 1} downloaded!");
                                 }
                                 catch (Exception e)
                                 {
