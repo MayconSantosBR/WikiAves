@@ -106,7 +106,26 @@ namespace WikiAves.Downloader.Services
 
                         await Parallel.ForEachAsync(documents, new ParallelOptions() { MaxDegreeOfParallelism = 1 }, async (document, token) =>
                         {
-                            
+                            foreach (var sound in document.Sounds)
+                            {
+                                try
+                                {
+                                    var pathForImage = @$"C:\Estudo\WikiAvesSounds\Images\{document.CommonName}-{sound.GetHashCode()}.jpg";
+                                    var pathForSound = @$"C:\Estudo\WikiAvesSounds\Sounds\{document.CommonName}-{sound.GetHashCode()}.mp3";
+
+                                    //Dont work, need to be rewied
+                                    if (File.Exists(pathForImage) || File.Exists(pathForSound))
+                                        continue;
+
+                                    await httpClient.DownloadFileTaskAsync(sound.FileSpecifications.LinkForImage, pathForImage);
+                                    await httpClient.DownloadFileTaskAsync(sound.FileSpecifications.LinkForSound, pathForSound);
+                                }
+                                catch (Exception e)
+                                {
+                                    await Console.Out.WriteLineAsync($"[{document.SpecieId}][{document.CommonName}] An error was ocurred during the download. Message: {e.Message}");
+                                    return;
+                                }
+                            }
                         });
                     }
                     else
