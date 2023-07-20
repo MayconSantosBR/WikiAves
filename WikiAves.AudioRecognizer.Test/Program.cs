@@ -44,11 +44,15 @@ namespace SoundClassifier
             var pipeline = mlContext.Transforms.Conversion.MapValueToKey(outputColumnName: "LabelAsKey",
                                                                             inputColumnName: "Label",
                                                                             keyOrdinality: ValueToKeyMappingEstimator.KeyOrdinality.ByValue)
-                        .Append(mlContext.Model.ImageClassification("ImagePath", "LabelAsKey",
-                                        arch: ImageClassificationTrainer.Architecture.InceptionV3,
-                                        epoch: 200,
-                                        metricsCallback: (metrics) => Console.WriteLine(metrics),
-                                        validationSet: transformedValidationDataView));
+                                                                                .Append(mlContext.MulticlassClassification.Trainers.ImageClassification(new ImageClassificationTrainer.Options()
+                                                                                {
+                                                                                    LabelColumnName = "ImagePath",
+                                                                                    FeatureColumnName = "LabelAsKey",
+                                                                                    Arch = ImageClassificationTrainer.Architecture.InceptionV3,
+                                                                                    Epoch = 200,
+                                                                                    MetricsCallback = (metrics) => Console.WriteLine(metrics),
+                                                                                    ValidationSet = transformedValidationDataView
+                                                                                }));
 
             //Train model
             ITransformer trainedModel = pipeline.Fit(trainDataView);
