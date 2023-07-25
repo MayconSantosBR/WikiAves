@@ -19,5 +19,16 @@ namespace WikiAves.Downloader.Util
                 }
             }
         }
+
+        public static void ConvertMp3ToWav(Stream audioStream, string _outPath_)
+        {
+            using (Mp3FileReader mp3 = new Mp3FileReader(audioStream))
+            {
+                using (WaveStream pcm = WaveFormatConversionStream.CreatePcmStream(mp3))
+                {
+                    WaveFileWriter.CreateWaveFile(_outPath_, pcm);
+                }
+            }
+        }
     }
 }

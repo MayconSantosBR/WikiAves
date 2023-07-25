@@ -117,15 +117,22 @@ namespace WikiAves.Downloader.Services
                                                             .ElementAt(1)
                                                             .Replace(".mp3", string.Empty);
 
-                                    var pathForSound = @$"C:\Estudo\WikiAvesSounds\Sounds\{document.CommonName}-{identifier}.mp3";
-                                    var pathForWav = $@"C:\Estudo\WikiAvesSounds\Sounds\Wav\{document.CommonName}-{identifier}.wav";
+                                    var pathForSound = @$"C:\Estudo\WikiAvesSounds\Sounds\{document.CommonName}_{identifier}.mp3";
+                                    var pathForWav = $@"C:\Estudo\WikiAvesSounds\Sounds\Wav\{document.CommonName}_{identifier}.wav";
+                                    var pathForTest = $@"C:\Estudo\WikiAvesSounds\Sounds\Wav\Data\Test\{document.CommonName}_{identifier}.wav";
+                                    var pathForTrain = $@"C:\Estudo\WikiAvesSounds\Sounds\Wav\Data\Train\{document.CommonName}_{identifier}.wav";
 
                                     if (File.Exists(pathForSound))
+                                        File.Delete(pathForSound);
+
+                                    if (File.Exists(pathForWav) || File.Exists(pathForTest) || File.Exists(pathForTrain))
                                         continue;
 
                                     await httpClient.DownloadFileTaskAsync(sound.FileSpecifications.LinkForSound, pathForSound);
 
                                     AudioExtensions.ConvertMp3ToWav(pathForSound, pathForWav);
+
+                                    File.Delete(pathForSound);
 
                                     await Console.Out.WriteLineAsync($"[{document.SpecieId}][{document.CommonName}] Sound {document.Sounds.IndexOf(sound) + 1} downloaded!");
                                 }

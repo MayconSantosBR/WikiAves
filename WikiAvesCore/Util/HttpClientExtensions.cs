@@ -31,5 +31,19 @@ namespace WikiAves.Core.Util
                 }
             }
         }
+
+        public static async Task<Stream> GetFileStreamAsync(this HttpClient client, string uriString)
+        {
+            var uri = new Uri(uriString);
+
+            using (var s = await client.GetStreamAsync(uri))
+            {
+                Stream content = new System.IO.MemoryStream();
+
+                await s.CopyToAsync(content);
+
+                return content;
+            }
+        }
     }
 }

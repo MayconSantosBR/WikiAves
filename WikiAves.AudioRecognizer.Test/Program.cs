@@ -3,25 +3,50 @@ using Microsoft.ML.Transforms;
 using Microsoft.ML.Data;
 using WikiAves.AudioRecognizer.Test.Models;
 using Microsoft.ML.Vision;
+using WikiAves.Core.Util;
 
 namespace SoundClassifier
 {
     class Program
     {
-        private static string DataPath = @"C:\Estudo\WikiAvesSounds\Sounds\Wav\Data";
+        private static string DataPath = @"C:\Estudo\WikiAvesSounds\Sounds\Wav";
 
         static void Main(string[] args)
         {
-            var trainDataPath = string.Concat(DataPath, @"\Train");
-            var testDataPath = string.Concat(DataPath, @"\Test");
+            var trainDataPath = string.Concat(DataPath, @"\Data\Train");
+            var testDataPath = string.Concat(DataPath, @"\Data\Test");
 
-            string[] allAudioFiles = Directory.GetFiles(DataPath, "*.wav*", SearchOption.AllDirectories);
+            List<string> allAudioFiles = Directory.GetFiles(DataPath, "*.wav*").ToList();
+            allAudioFiles.Shuffle();
+
+            List<List<string>> splittedFiles = allAudioFiles.ChunkBy(allAudioFiles.Count / 2);
+
+            foreach (var file in splittedFiles)
+            {
+                if (splittedFiles.ElementAt(0) == file)
+                {
+                    foreach (var audio in file)
+                    {
+                        var name = audio.Substring(audio.LastIndexOf("\\"));
+                        File.Move(audio, testDataPath + name);
+                    }
+                }
+
+                if (splittedFiles.ElementAt(1) == file)
+                {
+                    foreach (var audio in file)
+                    {
+                        var name = audio.Substring(audio.LastIndexOf("\\"));
+                        File.Move(audio, trainDataPath + name);
+                    }
+                }
+            }
+
+            allAudioFiles = Directory.GetFiles(DataPath, "*.wav*", SearchOption.AllDirectories).ToList();
 
             //Data pre-processing
             foreach (var fileName in allAudioFiles)
-            {
                 CreateSpectrogram(fileName);
-            }
 
             MLContext mlContext = new MLContext(seed: 1);
 
@@ -95,7 +120,9 @@ namespace SoundClassifier
         private static void CreateSpectrogram(string fileName)
         {
             var spectrogramName = fileName.Substring(0, fileName.Length - 4) + "-spectro.jpg";
-            if (File.Exists(spectrogramName)) return;
+
+            if (File.Exists(spectrogramName))
+                return;
 
             var spec = new Spectrogram.Spectrogram(sampleRate: 8000, fftSize: 2048, step: 700);
             float[] values = Spectrogram.Tools.ReadWav(fileName);
@@ -116,7 +143,7 @@ namespace SoundClassifier
                     continue;
 
                 var fileName = Path.GetFileName(file);
-                var label = fileName.Substring(0, fileName.Split("-").First().Length);
+                var label = fileName.Substring(0, fileName.LastIndexOf("_"));
 
                 yield return new SpectrogramData()
                 {
