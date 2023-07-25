@@ -8,12 +8,12 @@ namespace SoundClassifier
 {
     class Program
     {
-        private static string DataPath = @"C:\Users\Admin\Desktop\sound-classifier\ae_dataset\AudioEventDataset";
+        private static string DataPath = @"C:\Estudo\WikiAvesSounds\Sounds\Wav\Data";
 
         static void Main(string[] args)
         {
-            var trainDataPath = string.Concat(DataPath, @"\train");
-            var testDataPath = string.Concat(DataPath, @"\test");
+            var trainDataPath = string.Concat(DataPath, @"\Train");
+            var testDataPath = string.Concat(DataPath, @"\Test");
 
             string[] allAudioFiles = Directory.GetFiles(DataPath, "*.wav*", SearchOption.AllDirectories);
 
@@ -35,30 +35,41 @@ namespace SoundClassifier
             IDataView testDataView = mlContext.Data.LoadFromEnumerable(testImages);
 
             IDataView transformedValidationDataView = mlContext.Transforms.Conversion.MapValueToKey(outputColumnName: "LabelAsKey",
-                                                                            inputColumnName: "Label",
-                                                                            keyOrdinality: ValueToKeyMappingEstimator.KeyOrdinality.ByValue)
+                                                                            inputColumnName: "Label")
+                                                        .Append(mlContext.Transforms.LoadRawImageBytes(
+                                                            outputColumnName: "Image",
+                                                            imageFolder: testDataPath,
+                                                            inputColumnName: "ImagePath"))
                                                         .Fit(testDataView)
                                                         .Transform(testDataView);
 
+            IDataView transformedTrainDataView = mlContext.Transforms.Conversion.MapValueToKey(outputColumnName: "LabelAsKey",
+                                                                            inputColumnName: "Label")
+                                                        .Append(mlContext.Transforms.LoadRawImageBytes(
+                                                            outputColumnName: "Image",
+                                                            imageFolder: trainDataPath,
+                                                            inputColumnName: "ImagePath"))
+                                                        .Fit(trainDataView)
+                                                        .Transform(trainDataView);
+
             //Define training pipeline
             var pipeline = mlContext.Transforms.Conversion.MapValueToKey(outputColumnName: "LabelAsKey",
-                                                                            inputColumnName: "Label",
-                                                                            keyOrdinality: ValueToKeyMappingEstimator.KeyOrdinality.ByValue)
+                                                                            inputColumnName: "Label")
                                                                                 .Append(mlContext.MulticlassClassification.Trainers.ImageClassification(new ImageClassificationTrainer.Options()
                                                                                 {
-                                                                                    LabelColumnName = "ImagePath",
-                                                                                    FeatureColumnName = "LabelAsKey",
+                                                                                    LabelColumnName = "LabelAsKey",
+                                                                                    FeatureColumnName = "Image",
                                                                                     Arch = ImageClassificationTrainer.Architecture.InceptionV3,
                                                                                     Epoch = 200,
                                                                                     MetricsCallback = (metrics) => Console.WriteLine(metrics),
-                                                                                    ValidationSet = transformedValidationDataView
+                                                                                    ValidationSet = transformedValidationDataView,
                                                                                 }));
 
             //Train model
-            ITransformer trainedModel = pipeline.Fit(trainDataView);
+            ITransformer trainedModel = pipeline.Fit(transformedTrainDataView);
 
             //Evaluate
-            EvaluateModel(mlContext, testDataView, trainedModel);
+            EvaluateModel(mlContext, transformedValidationDataView, trainedModel);
 
             // Save
             mlContext.Model.Save(trainedModel, trainDataView.Schema, "sound-classifier.zip");
@@ -78,7 +89,7 @@ namespace SoundClassifier
             var originalLabels = keys.DenseValues().ToArray();
 
             List<SpectrogramPredictionEx> predictions = mlContext.Data.CreateEnumerable<SpectrogramPredictionEx>(predictionsDataView, false, true).ToList();
-            predictions.ForEach(pred => ConsoleWriteImagePrediction(pred.ImagePath, pred.Label, (originalLabels[pred.PredictedLabel]).ToString(), pred.Score.Max()));
+            predictions.ForEach(pred => ConsoleWriteImagePrediction(pred.ImagePath, pred.Label, (originalLabels[pred.PredictedLabel - 1]).ToString(), pred.Score.Max()));
         }
 
         private static void CreateSpectrogram(string fileName)
@@ -105,12 +116,12 @@ namespace SoundClassifier
                     continue;
 
                 var fileName = Path.GetFileName(file);
-                var label = fileName.Substring(0, fileName.LastIndexOf("_"));
+                var label = fileName.Substring(0, fileName.Split("-").First().Length);
 
                 yield return new SpectrogramData()
                 {
                     ImagePath = file,
-                    Label = label
+                    Label = label,
                 };
             }
         }
