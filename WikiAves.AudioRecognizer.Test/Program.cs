@@ -4,6 +4,9 @@ using Microsoft.ML.Data;
 using WikiAves.AudioRecognizer.Test.Models;
 using Microsoft.ML.Vision;
 using WikiAves.Core.Util;
+using NAudio.Wave;
+using Google.Protobuf.WellKnownTypes;
+using System.IO;
 
 namespace SoundClassifier
 {
@@ -17,6 +20,42 @@ namespace SoundClassifier
             var testDataPath = string.Concat(DataPath, @"\Data\Test");
 
             List<string> allAudioFiles = Directory.GetFiles(DataPath, "*.wav*").ToList();
+
+            foreach (var audio in allAudioFiles)
+            {
+                List<string> deleteFiles = new();
+
+                using (WaveFileReader waveReader = new WaveFileReader(audio))
+                {
+                    if (audio.Contains("-part"))
+                        continue;
+
+                    if (waveReader.TotalTime < TimeSpan.FromSeconds(10))
+                        deleteFiles.Add(audio);
+
+                    if (waveReader.TotalTime > TimeSpan.FromSeconds(10))
+                    {
+                        var currentTime = 0;
+                        int part = 1;
+
+                        while (currentTime < waveReader.TotalTime.Seconds)
+                        {
+                            using (var audioReader = new AudioFileReader(audio))
+                            {
+                                audioReader.CurrentTime = TimeSpan.FromSeconds(10 + currentTime);
+                                WaveFileWriter.CreateWaveFile16($"{audio.Substring(0, audio.Length - 4)}-part{part}.wav", audioReader.Take(TimeSpan.FromSeconds(10)));
+                                currentTime += 10;
+                                part++;
+                            }
+                        }
+                    }
+                }
+
+                foreach (var file in deleteFiles)
+                    File.Delete(file);
+            }
+
+            allAudioFiles = Directory.GetFiles(DataPath, "*.wav*").ToList();
             allAudioFiles.Shuffle();
 
             List<List<string>> splittedFiles = allAudioFiles.ChunkBy(allAudioFiles.Count / 2);
