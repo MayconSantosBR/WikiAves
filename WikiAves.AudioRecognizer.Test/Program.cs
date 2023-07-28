@@ -13,49 +13,17 @@ namespace SoundClassifier
     class Program
     {
         private static string DataPath = @"C:\Estudo\WikiAvesSounds\Sounds\Wav";
+        private static string BackupDataPath = @"C:\Estudo\WikiAvesSounds\Sounds\Backup";
 
         static void Main(string[] args)
         {
             var trainDataPath = string.Concat(DataPath, @"\Data\Train");
             var testDataPath = string.Concat(DataPath, @"\Data\Test");
 
-            List<string> allAudioFiles = Directory.GetFiles(DataPath, "*.wav*").ToList();
+            List<string> allAudioFiles = Directory.GetFiles(DataPath, "*.wav*", SearchOption.AllDirectories).ToList();
+            BreakAudioToStandard(allAudioFiles);
 
-            foreach (var audio in allAudioFiles)
-            {
-                List<string> deleteFiles = new();
-
-                using (WaveFileReader waveReader = new WaveFileReader(audio))
-                {
-                    if (audio.Contains("-part"))
-                        continue;
-
-                    if (waveReader.TotalTime < TimeSpan.FromSeconds(10))
-                        deleteFiles.Add(audio);
-
-                    if (waveReader.TotalTime > TimeSpan.FromSeconds(10))
-                    {
-                        var currentTime = 0;
-                        int part = 1;
-
-                        while (currentTime < waveReader.TotalTime.Seconds)
-                        {
-                            using (var audioReader = new AudioFileReader(audio))
-                            {
-                                audioReader.CurrentTime = TimeSpan.FromSeconds(10 + currentTime);
-                                WaveFileWriter.CreateWaveFile16($"{audio.Substring(0, audio.Length - 4)}-part{part}.wav", audioReader.Take(TimeSpan.FromSeconds(10)));
-                                currentTime += 10;
-                                part++;
-                            }
-                        }
-                    }
-                }
-
-                foreach (var file in deleteFiles)
-                    File.Delete(file);
-            }
-
-            allAudioFiles = Directory.GetFiles(DataPath, "*.wav*").ToList();
+            allAudioFiles = Directory.GetFiles(DataPath, "*.wav*", SearchOption.AllDirectories).ToList();
             allAudioFiles.Shuffle();
 
             List<List<string>> splittedFiles = allAudioFiles.ChunkBy(allAudioFiles.Count / 2);
@@ -139,6 +107,52 @@ namespace SoundClassifier
             mlContext.Model.Save(trainedModel, trainDataView.Schema, "sound-classifier.zip");
         }
 
+        private static void BreakAudioToStandard(List<string> allAudioFiles, int time = 10)
+        {
+            foreach (var audio in allAudioFiles)
+            {
+                List<string> deleteFiles = new();
+                List<string> moveFiles = new();
+
+                using (WaveFileReader waveReader = new WaveFileReader(audio))
+                {
+                    if (audio.Contains("-part"))
+                        continue;
+
+                    if (waveReader.TotalTime < TimeSpan.FromSeconds(time))
+                        deleteFiles.Add(audio);
+
+                    if (waveReader.TotalTime > TimeSpan.FromSeconds(time))
+                    {
+                        var currentTime = 0;
+                        int part = 1;
+
+                        while (currentTime < waveReader.TotalTime.TotalSeconds && (currentTime + time) < waveReader.TotalTime.TotalSeconds)
+                        {
+                            using (var audioReader = new AudioFileReader(audio))
+                            {
+                                audioReader.CurrentTime = TimeSpan.FromSeconds(0 + currentTime);
+                                WaveFileWriter.CreateWaveFile16($"{audio.Substring(0, audio.Length - 4)}-part{part}.wav", audioReader.Take(TimeSpan.FromSeconds(time)));
+                                currentTime += time;
+                                part++;
+                            }
+                        }
+
+                        moveFiles.Add(audio);
+                    }
+                }
+
+                foreach (var file in deleteFiles)
+                    File.Delete(file);
+
+                foreach (var file in moveFiles)
+                {
+                    var name = audio.Substring(audio.LastIndexOf("\\"));
+                    File.Move(audio, BackupDataPath + name);
+                }
+            }
+        }
+
         private static void EvaluateModel(MLContext mlContext, IDataView testDataset, ITransformer trainedModel)
         {
             Console.WriteLine("Making predictions in bulk for evaluating model's quality...");
@@ -168,6 +182,10 @@ namespace SoundClassifier
             spec.AddExtend(values);
 
             var bitmap = spec.GetBitmap(intensity: 2, freqHigh: 2500);
+
+            if (bitmap == null)
+                return;
+
             spec.SaveBitmap(bitmap, spectrogramName);
         }
 
@@ -189,16 +207,6 @@ namespace SoundClassifier
                     ImagePath = file,
                     Label = label,
                 };
-            }
-        }
-
-        private static void DeleteCurrentSpectrograms()
-        {
-            string[] allSpectrograms = Directory.GetFiles(DataPath, "*.jpg*", SearchOption.AllDirectories);
-
-            foreach (var spectroGram in allSpectrograms)
-            {
-                File.Delete(spectroGram);
             }
         }
 
