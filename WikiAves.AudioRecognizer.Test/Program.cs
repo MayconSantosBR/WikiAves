@@ -7,104 +7,97 @@ using WikiAves.Core.Util;
 using NAudio.Wave;
 using Google.Protobuf.WellKnownTypes;
 using System.IO;
+using static Tensorflow.Summary.Types;
+using static Microsoft.ML.DataOperationsCatalog;
+using Tensorflow;
 
 namespace SoundClassifier
 {
     class Program
     {
-        private static string DataPath = @"C:\Estudo\WikiAvesSounds\Sounds\Wav";
-        private static string BackupDataPath = @"C:\Estudo\WikiAvesSounds\Sounds\Backup";
+        private static string AudioDataPath = @"C:\Estudo\WikiAvesSounds\Sounds\Wav";
+        private static string BackupAudioDataPath = @"C:\Estudo\WikiAvesSounds\Sounds\Backup";
+        private static string SpectogramDataPath = @"C:\Estudo\WikiAvesSounds\Sounds\Spectograms";
 
         static void Main(string[] args)
         {
-            var trainDataPath = string.Concat(DataPath, @"\Data\Train");
-            var testDataPath = string.Concat(DataPath, @"\Data\Test");
+            var trainDataPath = string.Concat(AudioDataPath, @"\Data\Train");
+            var testDataPath = string.Concat(AudioDataPath, @"\Data\Test");
 
-            List<string> allAudioFiles = Directory.GetFiles(DataPath, "*.wav*", SearchOption.AllDirectories).ToList();
+            var allAudioFiles = Directory.GetFiles(AudioDataPath, "*.wav*", SearchOption.AllDirectories).ToList();
             BreakAudioToStandard(allAudioFiles);
 
-            allAudioFiles = Directory.GetFiles(DataPath, "*.wav*", SearchOption.AllDirectories).ToList();
-            allAudioFiles.Shuffle();
-
-            List<List<string>> splittedFiles = allAudioFiles.ChunkBy(allAudioFiles.Count / 2);
-
-            foreach (var file in splittedFiles)
-            {
-                if (splittedFiles.ElementAt(0) == file)
-                {
-                    foreach (var audio in file)
-                    {
-                        var name = audio.Substring(audio.LastIndexOf("\\"));
-                        File.Move(audio, testDataPath + name);
-                    }
-                }
-
-                if (splittedFiles.ElementAt(1) == file)
-                {
-                    foreach (var audio in file)
-                    {
-                        var name = audio.Substring(audio.LastIndexOf("\\"));
-                        File.Move(audio, trainDataPath + name);
-                    }
-                }
-            }
-
-            allAudioFiles = Directory.GetFiles(DataPath, "*.wav*", SearchOption.AllDirectories).ToList();
-
-            //Data pre-processing
+            //Create spectogram of wav files
             foreach (var fileName in allAudioFiles)
                 CreateSpectrogram(fileName);
 
+
+            //Move spectograms to directory
+            var allSpectograms = Directory.GetFiles(AudioDataPath, "*.jpg", SearchOption.AllDirectories).ToList();
+            MoveSpectogramsToFile(allSpectograms);
+
+            IEnumerable<SpectrogramData> images = LoadImagesFromDirectory(folder: SpectogramDataPath, false);
+
+            //MlContext
             MLContext mlContext = new MLContext(seed: 1);
+            IDataView imageData = mlContext.Data.LoadFromEnumerable(images);
+            IDataView shuffledData = mlContext.Data.ShuffleRows(imageData);
 
-            //Read and shuffle
-            IEnumerable<SpectrogramData> images = LoadImagesFromDirectory(folder: trainDataPath, useFolderNameasLabel: false).ToList();
-            IEnumerable<SpectrogramData> testImages = LoadImagesFromDirectory(folder: testDataPath, useFolderNameasLabel: false).ToList();
+            //Pipeline
+            var preProcessingPipeline = mlContext.Transforms.Conversion.MapValueToKey(
+                                            inputColumnName: nameof(ModelInput.Label),
+                                            outputColumnName: nameof(ModelInput.LabelAsKey))
+                                        .Append(mlContext.Transforms.LoadRawImageBytes(
+                                            outputColumnName: "Image",
+                                            imageFolder: SpectogramDataPath,
+                                            inputColumnName: nameof(ModelInput.ImagePath)));
 
-            IDataView trainDataView = mlContext.Data.LoadFromEnumerable(images);
-            trainDataView = mlContext.Data.ShuffleRows(trainDataView);
+            IDataView preProcessedData = preProcessingPipeline
+                                            .Fit(shuffledData)
+                                            .Transform(shuffledData);
 
-            IDataView testDataView = mlContext.Data.LoadFromEnumerable(testImages);
+            // Split Dataset : Train/Test/Validation
+            TrainTestData trainSplit = mlContext.Data.TrainTestSplit(data: preProcessedData, testFraction: 0.3);
+            TrainTestData validationTestSplit = mlContext.Data.TrainTestSplit(trainSplit.TestSet);
+            IDataView trainSet = trainSplit.TrainSet;                // 70% of total dataset
+            IDataView validationSet = validationTestSplit.TrainSet;  // 90% of 30% of total dataset
+            IDataView testSet = validationTestSplit.TestSet;         // 10% of 30% of total dataset
 
-            IDataView transformedValidationDataView = mlContext.Transforms.Conversion.MapValueToKey(outputColumnName: "LabelAsKey",
-                                                                            inputColumnName: "Label")
-                                                        .Append(mlContext.Transforms.LoadRawImageBytes(
-                                                            outputColumnName: "Image",
-                                                            imageFolder: testDataPath,
-                                                            inputColumnName: "ImagePath"))
-                                                        .Fit(testDataView)
-                                                        .Transform(testDataView);
 
-            IDataView transformedTrainDataView = mlContext.Transforms.Conversion.MapValueToKey(outputColumnName: "LabelAsKey",
-                                                                            inputColumnName: "Label")
-                                                        .Append(mlContext.Transforms.LoadRawImageBytes(
-                                                            outputColumnName: "Image",
-                                                            imageFolder: trainDataPath,
-                                                            inputColumnName: "ImagePath"))
-                                                        .Fit(trainDataView)
-                                                        .Transform(trainDataView);
+            // Classifier Options
+            // Architecture - ResnetV2101
+            var classifierOptions = new ImageClassificationTrainer.Options()
+            {
+                FeatureColumnName = "Image",
+                LabelColumnName = "LabelAsKey",
+                ValidationSet = validationSet,
+                Arch = ImageClassificationTrainer.Architecture.InceptionV3,
+                MetricsCallback = (metrics) => Console.WriteLine(metrics),
+                TestOnTrainSet = false,
+                ReuseTrainSetBottleneckCachedValues = true,
+                ReuseValidationSetBottleneckCachedValues = true
+            };
 
-            //Define training pipeline
-            var pipeline = mlContext.Transforms.Conversion.MapValueToKey(outputColumnName: "LabelAsKey",
-                                                                            inputColumnName: "Label")
-                                                                                .Append(mlContext.MulticlassClassification.Trainers.ImageClassification(new ImageClassificationTrainer.Options()
-                                                                                {
-                                                                                    LabelColumnName = "LabelAsKey",
-                                                                                    FeatureColumnName = "Image",
-                                                                                    Arch = ImageClassificationTrainer.Architecture.InceptionV3,
-                                                                                    Epoch = 200,
-                                                                                    MetricsCallback = (metrics) => Console.WriteLine(metrics),
-                                                                                    ValidationSet = transformedValidationDataView,
-                                                                                }));
+            // Training Pipeline
+            var trainingPipeline = mlContext.MulticlassClassification.Trainers.ImageClassification(classifierOptions);
 
-            //Train model
-            ITransformer trainedModel = pipeline.Fit(transformedTrainDataView);
+            // Train Model
+            ITransformer trainedModel = trainingPipeline.Fit(trainSet);
 
             //Evaluate
-            EvaluateModel(mlContext, transformedValidationDataView, trainedModel);
+            EvaluateModel(mlContext, trainSet, trainedModel);
 
             // Save
-            mlContext.Model.Save(trainedModel, trainDataView.Schema, "sound-classifier.zip");
+            mlContext.Model.Save(trainedModel, trainSet.Schema, "sound-classifier.zip");
+        }
+
+        private static void MoveSpectogramsToFile(List<string> allSpectograms)
+        {
+            foreach (var fileName in allSpectograms)
+            {
+                var name = fileName.Substring(fileName.LastIndexOf("\\"));
+                File.Move(fileName, SpectogramDataPath + name);
+            }
         }
 
         private static void BreakAudioToStandard(List<string> allAudioFiles, int time = 10)
@@ -147,8 +140,8 @@ namespace SoundClassifier
 
                 foreach (var file in moveFiles)
                 {
-                    var name = audio.Substring(audio.LastIndexOf("\\"));
-                    File.Move(audio, BackupDataPath + name);
+                    var name = file.Substring(file.LastIndexOf("\\"));
+                    File.Move(file, BackupAudioDataPath + name);
                 }
             }
         }
@@ -173,8 +166,10 @@ namespace SoundClassifier
         private static void CreateSpectrogram(string fileName)
         {
             var spectrogramName = fileName.Substring(0, fileName.Length - 4) + "-spectro.jpg";
+            var name = SpectogramDataPath + spectrogramName.Substring(fileName.LastIndexOf("\\"));
 
-            if (File.Exists(spectrogramName))
+
+            if (File.Exists(spectrogramName) || File.Exists(name))
                 return;
 
             var spec = new Spectrogram.Spectrogram(sampleRate: 8000, fftSize: 2048, step: 700);
