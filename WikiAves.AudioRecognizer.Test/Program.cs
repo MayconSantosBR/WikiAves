@@ -21,12 +21,10 @@ namespace SoundClassifier
 
         static void Main(string[] args)
         {
-            var trainDataPath = string.Concat(AudioDataPath, @"\Data\Train");
-            var testDataPath = string.Concat(AudioDataPath, @"\Data\Test");
-
             var allAudioFiles = Directory.GetFiles(AudioDataPath, "*.wav*", SearchOption.AllDirectories).ToList();
             BreakAudioToStandard(allAudioFiles);
 
+            allAudioFiles = Directory.GetFiles(AudioDataPath, "*.wav*", SearchOption.AllDirectories).ToList();
             //Create spectogram of wav files
             foreach (var fileName in allAudioFiles)
                 CreateSpectrogram(fileName);
@@ -57,7 +55,7 @@ namespace SoundClassifier
                                             .Transform(shuffledData);
 
             // Split Dataset : Train/Test/Validation
-            TrainTestData trainSplit = mlContext.Data.TrainTestSplit(data: preProcessedData, testFraction: 0.3);
+            TrainTestData trainSplit = mlContext.Data.TrainTestSplit(data: preProcessedData, testFraction: 0.2);
             TrainTestData validationTestSplit = mlContext.Data.TrainTestSplit(trainSplit.TestSet);
             IDataView trainSet = trainSplit.TrainSet;                // 70% of total dataset
             IDataView validationSet = validationTestSplit.TrainSet;  // 90% of 30% of total dataset
@@ -160,7 +158,14 @@ namespace SoundClassifier
             var originalLabels = keys.DenseValues().ToArray();
 
             List<SpectrogramPredictionEx> predictions = mlContext.Data.CreateEnumerable<SpectrogramPredictionEx>(predictionsDataView, false, true).ToList();
-            predictions.ForEach(pred => ConsoleWriteImagePrediction(pred.ImagePath, pred.Label, (originalLabels[pred.PredictedLabel - 1]).ToString(), pred.Score.Max()));
+
+            int score = 0;
+            foreach (var pred in predictions)
+                score += ConsoleWriteImagePrediction(pred.ImagePath, pred.Label, (originalLabels[pred.PredictedLabel - 1]).ToString(), pred.Score.Max());
+
+            Console.WriteLine($"Predictions: {predictions.Count()}");
+            Console.WriteLine($"Score: {score}\n");
+            Console.WriteLine($"Success rate: {Math.Round(Convert.ToDouble(score) / Convert.ToDouble(predictions.Count) * 100, 2)}%\n");
         }
 
         private static void CreateSpectrogram(string fileName)
@@ -205,7 +210,7 @@ namespace SoundClassifier
             }
         }
 
-        public static void ConsoleWriteImagePrediction(string ImagePath, string Label, string PredictedLabel, float Probability)
+        public static int ConsoleWriteImagePrediction(string ImagePath, string Label, string PredictedLabel, float Probability)
         {
             var defaultForeground = Console.ForegroundColor;
             var labelColor = ConsoleColor.Magenta;
@@ -223,11 +228,9 @@ namespace SoundClassifier
             Console.ForegroundColor = labelColor;
             Console.Write(PredictedLabel);
             Console.ForegroundColor = defaultForeground;
-            Console.Write(" with score ");
-            Console.ForegroundColor = probColor;
-            Console.Write(Probability);
-            Console.ForegroundColor = defaultForeground;
-            Console.WriteLine("");
+            Console.WriteLine("\n");
+
+            return PredictedLabel.ToLower().Equals(Label.ToLower()) ? 1 : 0;
         }
     }
 }
