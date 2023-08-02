@@ -63,7 +63,6 @@ namespace SoundClassifier
 
 
             // Classifier Options
-            // Architecture - ResnetV2101
             var classifierOptions = new ImageClassificationTrainer.Options()
             {
                 FeatureColumnName = "Image",
