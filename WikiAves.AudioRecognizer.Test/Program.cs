@@ -10,6 +10,10 @@ using System.IO;
 using static Tensorflow.Summary.Types;
 using static Microsoft.ML.DataOperationsCatalog;
 using Tensorflow;
+using System.Drawing.Imaging;
+using System.Drawing;
+using Spectrogram;
+using WikiAves.AudioRecognizer.Test.Util.NAudio;
 
 namespace SoundClassifier
 {
@@ -19,19 +23,39 @@ namespace SoundClassifier
         private static string BackupAudioDataPath = @"C:\Estudo\WikiAvesSounds\Sounds\Backup";
         private static string SpectogramDataPath = @"C:\Estudo\WikiAvesSounds\Sounds\Spectograms";
 
+        private static int _fftSize = 4096;
+        private static int _stepSize = 500;
+        private static int _maxFreq = 3000;
+        private static int _melBinCount = 250;
+
+        private static string MelSpectroExtension = "-melspectro.png";
+
         static void Main(string[] args)
         {
             var allAudioFiles = Directory.GetFiles(AudioDataPath, "*.wav*", SearchOption.AllDirectories).ToList();
+
+            //Attempt to clean "empty" audio in audio files
+            foreach (var audio in allAudioFiles)
+            {
+                using (AudioFileReader reader = new AudioFileReader(audio))
+                {
+                    TimeSpan duration = reader.GetSilenceDuration(AudioFileReaderExtensions.SilenceLocation.Start);
+
+                    reader.CurrentTime = duration;
+                    WaveFileWriter.CreateWaveFile16($"{audio.Substring(0, audio.Length - 4)}-cleaned.wav", reader.Take((reader.TotalTime - duration)));
+                }
+            }
+
+            allAudioFiles = Directory.GetFiles(AudioDataPath, "*.wav*", SearchOption.AllDirectories).ToList();
             BreakAudioToStandard(allAudioFiles);
 
             allAudioFiles = Directory.GetFiles(AudioDataPath, "*.wav*", SearchOption.AllDirectories).ToList();
             //Create spectogram of wav files
             foreach (var fileName in allAudioFiles)
-                CreateSpectrogram(fileName);
-
+                CreateMelSpectrogram(fileName);
 
             //Move spectograms to directory
-            var allSpectograms = Directory.GetFiles(AudioDataPath, "*.jpg", SearchOption.AllDirectories).ToList();
+            var allSpectograms = Directory.GetFiles(AudioDataPath, "*.png", SearchOption.AllDirectories).ToList();
             MoveSpectogramsToFile(allSpectograms);
 
             IEnumerable<SpectrogramData> images = LoadImagesFromDirectory(folder: SpectogramDataPath, false);
@@ -55,7 +79,7 @@ namespace SoundClassifier
                                             .Transform(shuffledData);
 
             // Split Dataset : Train/Test/Validation
-            TrainTestData trainSplit = mlContext.Data.TrainTestSplit(data: preProcessedData, testFraction: 0.2);
+            TrainTestData trainSplit = mlContext.Data.TrainTestSplit(data: preProcessedData, testFraction: 0.3);
             TrainTestData validationTestSplit = mlContext.Data.TrainTestSplit(trainSplit.TestSet);
             IDataView trainSet = trainSplit.TrainSet;                // 70% of total dataset
             IDataView validationSet = validationTestSplit.TrainSet;  // 90% of 30% of total dataset
@@ -143,6 +167,42 @@ namespace SoundClassifier
             }
         }
 
+        private static void CreateMelSpectrogram(string fileName)
+        {
+            var spectrogramName = fileName.Substring(0, fileName.Length - 4) + MelSpectroExtension;
+            var name = SpectogramDataPath + spectrogramName.Substring(fileName.LastIndexOf("\\"));
+
+            if (File.Exists(spectrogramName) || File.Exists(name))
+                return;
+
+            (double[] audio, int sampleRate) = ReadWavMono(fileName);
+            var sg = new SpectrogramGenerator(sampleRate, fftSize: _fftSize, stepSize: _stepSize, maxFreq: _maxFreq);
+            sg.Add(audio);
+
+            // Create a traditional (linear) Spectrogram
+            // sg.SaveImage("hal.png");
+
+            // Create a Mel Spectrogram
+            Bitmap bmp = sg.GetBitmapMel(melBinCount: _melBinCount);
+
+            bmp.Save(spectrogramName, ImageFormat.Png);
+        }
+
+        private static (double[] audio, int sampleRate) ReadWavMono(string filePath, double multiplier = 16_000)
+        {
+            using var afr = new NAudio.Wave.AudioFileReader(filePath);
+            int sampleRate = afr.WaveFormat.SampleRate;
+            int bytesPerSample = afr.WaveFormat.BitsPerSample / 8;
+            int sampleCount = (int)(afr.Length / bytesPerSample);
+            int channelCount = afr.WaveFormat.Channels;
+            var audio = new List<double>(sampleCount);
+            var buffer = new float[sampleRate * channelCount];
+            int samplesRead = 0;
+            while ((samplesRead = afr.Read(buffer, 0, buffer.Length)) > 0)
+                audio.AddRange(buffer.Take(samplesRead).Select(x => x * multiplier));
+            return (audio.ToArray(), sampleRate);
+        }
+
         private static void EvaluateModel(MLContext mlContext, IDataView testDataset, ITransformer trainedModel)
         {
             Console.WriteLine("Making predictions in bulk for evaluating model's quality...");
@@ -167,30 +227,9 @@ namespace SoundClassifier
             Console.WriteLine($"Success rate: {Math.Round(Convert.ToDouble(score) / Convert.ToDouble(predictions.Count) * 100, 2)}%\n");
         }
 
-        private static void CreateSpectrogram(string fileName)
-        {
-            var spectrogramName = fileName.Substring(0, fileName.Length - 4) + "-spectro.jpg";
-            var name = SpectogramDataPath + spectrogramName.Substring(fileName.LastIndexOf("\\"));
-
-
-            if (File.Exists(spectrogramName) || File.Exists(name))
-                return;
-
-            var spec = new Spectrogram.Spectrogram(sampleRate: 8000, fftSize: 2048, step: 700);
-            float[] values = Spectrogram.Tools.ReadWav(fileName);
-            spec.AddExtend(values);
-
-            var bitmap = spec.GetBitmap(intensity: 2, freqHigh: 2500);
-
-            if (bitmap == null)
-                return;
-
-            spec.SaveBitmap(bitmap, spectrogramName);
-        }
-
         public static IEnumerable<SpectrogramData> LoadImagesFromDirectory(string folder, bool useFolderNameasLabel = true)
         {
-            var files = Directory.GetFiles(folder, "*spectro.jpg",
+            var files = Directory.GetFiles(folder, "*melspectro.png",
                 searchOption: SearchOption.AllDirectories);
 
             foreach (var file in files)
