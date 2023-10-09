@@ -8,15 +8,12 @@ namespace WikiAvesScrapper.Controllers
     [Route("[controller]")]
     public class SoundController : Controller
     {
-        private readonly ISoundService soundService;
-
-        public SoundController(ISoundService soundService)
-        {
-            this.soundService = soundService;
-        }
 
         [HttpGet("scrapper/specie/{specieId}")]
-        public async Task<ActionResult<List<string>>> GetSoundsBySpecieId([FromRoute] long specieId)
+        public async Task<ActionResult<List<string>>> GetSoundsBySpecieId(
+            [FromRoute] long specieId,
+            [FromServices] ISoundService soundService
+            )
         {
             try
             {

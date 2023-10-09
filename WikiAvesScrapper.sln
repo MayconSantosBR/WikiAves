@@ -3,13 +3,15 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.6.33712.159
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WikiAves.Scrapper", "WikiAvesScrapper\WikiAves.Scrapper.csproj", "{7FF858AC-6727-43B4-9F4B-C039FE79FB90}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WikiAves.Scrapper.Api", "WikiAvesScrapper\WikiAves.Scrapper.Api.csproj", "{7FF858AC-6727-43B4-9F4B-C039FE79FB90}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WikiAves.Downloader", "WikiAvesDownloader\WikiAves.Downloader.csproj", "{4B6F2732-23A7-4865-9C3F-FD341460D024}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WikiAves.Core", "WikiAvesCore\WikiAves.Core.csproj", "{BE3EA98C-922D-47CF-83E7-BBE2FA8DBCDE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WikiAves.AudioRecognizer.Test", "WikiAves.AudioRecognizer.Test\WikiAves.AudioRecognizer.Test.csproj", "{B2B6C377-CA8F-449C-A1E5-4FB14E730E62}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WikiAves.AudioRecognizer.Test", "WikiAves.AudioRecognizer.Test\WikiAves.AudioRecognizer.Test.csproj", "{B2B6C377-CA8F-449C-A1E5-4FB14E730E62}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WikiAves.AudioRecognizer.Api", "WikiAves.AudioRecognizer.Api\WikiAves.AudioRecognizer.Api.csproj", "{79D90BBF-4111-4CC6-956F-C3E69C7DE007}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,6 +35,10 @@ Global
 		{B2B6C377-CA8F-449C-A1E5-4FB14E730E62}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B2B6C377-CA8F-449C-A1E5-4FB14E730E62}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B2B6C377-CA8F-449C-A1E5-4FB14E730E62}.Release|Any CPU.Build.0 = Release|Any CPU
+		{79D90BBF-4111-4CC6-956F-C3E69C7DE007}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{79D90BBF-4111-4CC6-956F-C3E69C7DE007}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{79D90BBF-4111-4CC6-956F-C3E69C7DE007}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{79D90BBF-4111-4CC6-956F-C3E69C7DE007}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
