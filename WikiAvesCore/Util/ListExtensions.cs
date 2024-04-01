@@ -31,5 +31,35 @@ namespace WikiAves.Core.Util
                 .Select(x => x.Select(v => v.Value).ToList())
                 .ToList();
         }
+
+        public static string ConvertToCsv<T>(this IEnumerable<T> data)
+        {
+            if (data == null)
+                throw new ArgumentNullException(nameof(data));
+
+            var properties = typeof(T).GetProperties();
+
+            using var stringWriter = new StringWriter();
+            WriteCsvHeader(stringWriter, properties);
+            WriteCsvData(stringWriter, data, properties);
+
+            return stringWriter.ToString();
+        }
+
+        private static void WriteCsvHeader(TextWriter writer, System.Reflection.PropertyInfo[] properties)
+        {
+            var header = string.Join(",", properties.Select(p => p.Name));
+            writer.WriteLine(header);
+        }
+
+        private static void WriteCsvData<T>(TextWriter writer, IEnumerable<T> data, System.Reflection.PropertyInfo[] properties)
+        {
+            foreach (var item in data)
+            {
+                var values = properties.Select(p => p.GetValue(item)?.ToString() ?? string.Empty);
+                var line = string.Join(",", values);
+                writer.WriteLine(line);
+            }
+        }
     }
 }

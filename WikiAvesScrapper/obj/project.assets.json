@@ -5254,19 +5254,24 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\mico_\\.nuget\\packages\\": {}
+    "C:\\Users\\mico_\\.nuget\\packages\\": {},
+    "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Fontes\\WikiAves\\WikiAvesScrapper\\WikiAves.Scrapper.Api.csproj",
+      "projectUniqueName": "C:\\Pessoal\\WikiAves\\WikiAvesScrapper\\WikiAves.Scrapper.Api.csproj",
       "projectName": "WikiAves.Scrapper.Api",
-      "projectPath": "C:\\Fontes\\WikiAves\\WikiAvesScrapper\\WikiAves.Scrapper.Api.csproj",
+      "projectPath": "C:\\Pessoal\\WikiAves\\WikiAvesScrapper\\WikiAves.Scrapper.Api.csproj",
       "packagesPath": "C:\\Users\\mico_\\.nuget\\packages\\",
-      "outputPath": "C:\\Fontes\\WikiAves\\WikiAvesScrapper\\obj\\",
+      "outputPath": "C:\\Pessoal\\WikiAves\\WikiAvesScrapper\\obj\\",
       "projectStyle": "PackageReference",
+      "fallbackFolders": [
+        "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+      ],
       "configFilePaths": [
         "C:\\Users\\mico_\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
       "originalTargetFrameworks": [
@@ -5274,15 +5279,15 @@
       ],
       "sources": {
         "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
-        "C:\\Program Files\\dotnet\\sdk\\7.0.302\\Sdks\\Microsoft.NET.Sdk.Web\\library-packs": {},
+        "C:\\Program Files\\dotnet\\library-packs": {},
         "https://api.nuget.org/v3/index.json": {}
       },
       "frameworks": {
         "net6.0": {
           "targetAlias": "net6.0",
           "projectReferences": {
-            "C:\\Fontes\\WikiAves\\WikiAvesCore\\WikiAves.Core.csproj": {
-              "projectPath": "C:\\Fontes\\WikiAves\\WikiAvesCore\\WikiAves.Core.csproj"
+            "C:\\Pessoal\\WikiAves\\WikiAvesCore\\WikiAves.Core.csproj": {
+              "projectPath": "C:\\Pessoal\\WikiAves\\WikiAvesCore\\WikiAves.Core.csproj"
             }
           }
         }
@@ -5291,6 +5296,11 @@
         "warnAsError": [
           "NU1605"
         ]
+      },
+      "restoreAuditProperties": {
+        "enableAudit": "true",
+        "auditLevel": "low",
+        "auditMode": "direct"
       }
     },
     "frameworks": {
@@ -5341,7 +5351,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\7.0.302\\RuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.202\\RuntimeIdentifierGraph.json"
       }
     }
   },

@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "Vni+Qd6+8g0mA7CchzNV+eJ5jyd3F5TO1Cno/g1gWmuV/audeE7tx9lxF3F582zcuVHtlADxDhAo3sTx/qDEJg==",
+  "dgSpecHash": "W0j22kbtXntzBZm81o2LoLP7Jwv8f8Hi0WE81ZawkpXQnLixIeD3V/AbyTtQ2LyVLk/7Cl2wgu6h3iAlHGl8ew==",
   "success": true,
-  "projectFilePath": "C:\\Fontes\\WikiAves\\WikiAvesScrapper\\WikiAves.Scrapper.Api.csproj",
+  "projectFilePath": "C:\\Pessoal\\WikiAves\\WikiAvesScrapper\\WikiAves.Scrapper.Api.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\mico_\\.nuget\\packages\\anglesharp\\1.0.3\\anglesharp.1.0.3.nupkg.sha512",
     "C:\\Users\\mico_\\.nuget\\packages\\anglesharp.css\\0.17.0\\anglesharp.css.0.17.0.nupkg.sha512",
